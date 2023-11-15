@@ -26,29 +26,18 @@ class SpringSimulationDemo extends StatefulWidget {
 class _SpringSimulationDemoState extends State<SpringSimulationDemo>
     with SingleTickerProviderStateMixin {
   late AnimationController _controller;
-  late Animation<Alignment> _animation;
+  late double height;
+  late double width;
 
   @override
   void initState() {
     super.initState();
-    _controller = AnimationController.unbounded(vsync: this);
-    _animation = _controller.drive(
-      AlignmentTween(
-        begin: const Alignment(
-          0,
-          0,
-        ),
-        end: const Alignment(
-          0,
-          1,
-        ),
-      ),
+    _controller = AnimationController.unbounded(
+      vsync: this,
     );
-
     _controller.addListener(() {
       if (kDebugMode) {
-        print("Controller ${_controller.value}");
-        print("Animation ${_animation.value}");
+        print(_controller.value);
       }
     });
   }
@@ -60,56 +49,85 @@ class _SpringSimulationDemoState extends State<SpringSimulationDemo>
   }
 
   @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    height = (MediaQuery.of(context).size.height -
+        (MediaQuery.maybeViewPaddingOf(context)?.vertical ?? 0));
+    width = MediaQuery.sizeOf(context).width;
+    if (kDebugMode) {
+      print(MediaQuery.of(context).size);
+      print(MediaQuery.maybeViewPaddingOf(context)?.vertical);
+      print(MediaQuery.of(context).devicePixelRatio);
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: SafeArea(
-        child: Center(
-          child: Column(
-            children: [
-              Expanded(
-                child: AnimatedBuilder(
-                    animation: _animation,
-                    child: Container(
-                      color: Colors.black,
-                      height: 10,
-                      width: 10,
-                    ),
-                    builder: (context, child) {
-                      return Align(
-                        alignment: _animation.value,
-                        child: child,
-                      );
-                    }),
-              ),
-              ElevatedButton(
-                  onPressed: () {
-                    _controller.animateWith(SpringSimulation(
-                      //In Spring description we define actual properties of a spring
-                      const SpringDescription(
-                        // Lower the damping coefficient better it will bounce
-                        // Damping means restraining oscillatory motion
-                        damping: 1,
-                        // More stiffness means spring will less deform
-                        // Springs having higher stiffness are more difficult to stretch
-                        stiffness: 1,
-                        //Mass Attached to the spring
-                        mass: 1,
-                      ),
-                      //When initial and Final Position is same then spring is in equilibrium
-                      //Initial position
-                      0,
-                      //Final position
-                      1,
-                      // Negative means spring will stretch itself from the starting position.
-                      // Positive means spring will stretch itself from the ending potion.
-                      0,
-                    ));
-                  },
-                  child: const Text('Play Spring Simulation'))
-            ],
+        child: Align(
+          alignment: Alignment.topCenter,
+          child: CustomPaint(
+            painter: BoxPainter(animation: _controller),
+            size: Size(width, height),
           ),
         ),
       ),
+      floatingActionButton: FloatingActionButton.extended(
+        isExtended: true,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        onPressed: () {
+
+          //Starting position defines whether the spring is compressed or stretched.
+          //If initial position is greater than final position then it will be considered as stretched
+          //Starting position defines the location from where string will be released.
+
+          //Initial velocity of the spring we will release it.
+
+          //Spring constant
+          //Stiffness defines how much this spring resists deformation.
+          //It is defined as the force required to compress or stretch the spring by a certain distance
+          // k(stiffness) = F/X
+
+          //Damping coefficient
+          //Dampness define how the spring oscillation will decay
+          //In simple words, damping controls oscillation
+          //Higher dampness means less oscillation
+
+
+          _controller.animateWith(SpringSimulation(
+            const SpringDescription(
+              mass: 10,
+              stiffness: 10,
+              damping: 0.5,
+            ),
+            0,
+            height / 2,
+            100,
+          ));
+        },
+        label: const Text('Play Simulation'),
+      ),
     );
+  }
+}
+
+class BoxPainter extends CustomPainter {
+  final Animation animation;
+  BoxPainter({required this.animation}) : super(repaint: animation);
+  @override
+  void paint(Canvas canvas, Size size) {
+    canvas.translate(0, 10);
+    canvas.drawRect(
+        Rect.fromCenter(
+            center: Offset(size.width / 2, animation.value),
+            width: 20,
+            height: 20),
+        Paint()..color = Colors.green);
+  }
+
+  @override
+  bool shouldRepaint(BoxPainter oldDelegate) {
+    return true;
   }
 }
