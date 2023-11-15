@@ -37,6 +37,7 @@ class _SpringSimulationDemoState extends State<SpringSimulationDemo>
     );
     _controller.addListener(() {
       if (kDebugMode) {
+        print(_controller.lastElapsedDuration);
         print(_controller.value);
       }
     });
@@ -95,15 +96,26 @@ class _SpringSimulationDemoState extends State<SpringSimulationDemo>
           //Higher dampness means less oscillation
 
 
+          //0:00:27.483336
+          // With damping 0.1 and stiffness 1
+
+          //0:00:28.216668
+          // With damping 0.1 and stiffness 0.1
+
+          //0:00:03.383335
+          // With damping 1 and stiffness 0.1
+
+          //0:00:03.350003
+          // With damping 1 and stiffness 1
           _controller.animateWith(SpringSimulation(
             const SpringDescription(
-              mass: 10,
-              stiffness: 10,
-              damping: 0.5,
+              mass: 1,
+              stiffness: 0.1,
+              damping: 1,
             ),
             0,
             height / 2,
-            100,
+            500,
           ));
         },
         label: const Text('Play Simulation'),
