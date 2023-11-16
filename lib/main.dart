@@ -113,9 +113,12 @@ class _SpringSimulationDemoState extends State<SpringSimulationDemo>
               stiffness: 0.1,
               damping: 1,
             ),
+            //Initial position of the spring
             0,
+            //This is going to be the anchor
+            //Particle is going to rest here
             height / 2,
-            500,
+            1000,
           ));
         },
         label: const Text('Play Simulation'),
